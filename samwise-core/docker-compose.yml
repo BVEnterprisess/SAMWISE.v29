@@ -1,0 +1,29 @@
+services:
+  samwise-core:
+    build: .
+    container_name: samwise-core-native
+    ports:
+      - "30000:30000"
+      - "30001:30001"
+    volumes:
+      - yantrikdb-data:/app/data
+    environment:
+      - YANTRIKDB_PATH=/app/data/yantrikdb.sqlite
+      - STATE_DB_PATH=/app/data/sidecar_state.db
+      - LLM_API_BASE=http://host.docker.internal:20128/v1
+      - RUST_LOG=samwise_core=info,tower_http=info
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '2.0'
+
+volumes:
+  yantrikdb-data:
