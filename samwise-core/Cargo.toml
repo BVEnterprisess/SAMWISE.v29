@@ -1,0 +1,32 @@
+[package]
+name = "samwise-core"
+version = "3.0.0"
+edition = "2024"
+rust-version = "1.88"
+
+[dependencies]
+tokio = { version = "1.45", features = ["full", "tracing", "signal"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+axum = { version = "0.8", features = ["macros", "json"] }
+tower-http = { version = "0.6", features = ["cors", "trace", "timeout", "limit"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sqlx = { version = "0.9", features = ["sqlite", "runtime-tokio", "macros", "migrate"] }
+yantrikdb = "0.12"
+reqwest = { version = "0.13", features = ["json", "http2", "rustls-tls", "stream"], default-features = false }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+uuid = { version = "1.12", features = ["v4", "serde"] }
+thiserror = "2.0"
+compact_str = { version = "0.9", features = ["serde"] }
+miette = { version = "7.0", features = ["fancy"] }
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+strip = true
+panic = "abort"
+opt-level = 3
+
+[dev-dependencies]
+tokio-test = "0.4"
