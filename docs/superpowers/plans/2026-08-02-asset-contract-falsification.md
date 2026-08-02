@@ -339,4 +339,4 @@ git commit -m "docs: lock asset contract falsification gate"
 - H0 and paired benchmark: Task 5.
 - Reproducible verification: Task 6.
 
-This plan intentionally does not implement OmniRoute ingestion, YantrikDB adapters, MetaClaw extraction, or skill evolution. Those are downstream plans and cannot begin until Pass 0 is green.
+This plan intentionally does not implement OmniRoute ingestion, YantrikDB adapters, MetaClaw procedure validation, or skill evolution. Those are downstream plans and cannot begin until Pass 0 is green.

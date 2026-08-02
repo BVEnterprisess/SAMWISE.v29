@@ -2,7 +2,7 @@
 
 ## Closure Authority — 2026-08-02
 
-This document defines the objective; the [closure contract](docs/superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md) defines the proof obligations.
+This document defines the objective; the [closure contract](superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md) defines the proof obligations.
 
 ```text
 Gradient = Compounding
