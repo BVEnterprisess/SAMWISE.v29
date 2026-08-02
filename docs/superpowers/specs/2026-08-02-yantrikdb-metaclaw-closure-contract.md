@@ -11,6 +11,16 @@ Build a persistent learning layer that demonstrably improves future agent execut
 
 The system is complete only when a controlled benchmark proves that a second execution of a similar task is measurably better than the first because of what the first execution taught the system.
 
+The optimization target is:
+
+```text
+Gradient = Compounding
+```
+
+The two observable derivatives are decreasing HITL coordination tax and increasing compression ratio. Latency, tokens, retries, retrieval quality, provenance, and integrity are measurements or constraints supporting that objective, not independent optimization targets.
+
+Compression improvement is valid only when the outcome is equivalent or better. Lower output, lower retrieval, or lower token use without equal-or-better task correctness is not compounding.
+
 ## 2. System boundary
 
 YantrikDB remains the authoritative cognitive memory substrate. It owns durable records, embeddings, importance calibration, half-life decay, recall scoring, provenance, idempotency, links, conflicts, corrections, supersession, and cognition/maintenance through `think()`.
@@ -31,6 +41,51 @@ objective
   -> future improved execution
 ```
 
+## 2.1 Evidence-Preserving Asset Contract
+
+An asset is an immutable, typed, content-addressed interpretation of one or more observed trace events. It is not truth and it is not a mutable memory row.
+
+```text
+Asset
+├── Identity: asset_id, asset_type, schema_version, content_hash, created_at
+├── DerivedContent: canonical_payload, normalized_text, structured_fields
+├── Provenance: execution IDs, trace event IDs, artifact refs, extractor/version
+├── Integrity: payload hash, parent asset IDs, redaction status, canonicalization version
+└── Scope: namespace, department, environment, tools, validity window
+
+EvidenceLink: supports | contradicts | explains | uses
+Evaluation: objective or subjective assessment, outcome, confidence, uncertainty,
+            utility, evaluator version, policy version, timestamp
+AssetRelation: supersedes | splits | merges | corrects | derives_from
+```
+
+One trace may produce zero or many assets. Multiple traces may support one asset through append-only evidence links. A split or merge creates new immutable assets and preserves all parents. A new interpretation creates a new evaluation or asset; it never edits the old asset.
+
+Canonical identity is computed as:
+
+```text
+content_hash = Hash(Canonicalize(canonical_payload, schema_version,
+                                  canonicalization_policy_version))
+```
+
+Canonicalization must define object-key ordering, array ordering, numeric normalization, Unicode normalization, UTF-8 encoding, rejection of NaN/Infinity, and schema-version inclusion. The canonicalization policy is immutable and content-addressed.
+
+Projection status is derived, not stored as mutable truth:
+
+```text
+status(asset, t) = Projection(asset,
+                               evidence_links up to t,
+                               evaluations up to t,
+                               relations up to t,
+                               immutable policy bundle)
+```
+
+Event types are classified as commutative, causally ordered, or conditionally commutative. Default classification is non-commutative until a projection test proves commutativity:
+
+```text
+Projection(H + A + B) == Projection(H + B + A)
+```
+
 ## 3. Non-negotiable invariants
 
 1. A retry with the same idempotency key cannot create duplicate evidence, duplicate usage, or duplicate corroboration.
@@ -43,6 +98,9 @@ objective
 8. If no relevant knowledge or skill exists, the learning layer is baseline-equivalent: it adds no behavior-changing context and causes no measurable regression.
 9. Failed or rejected evidence cannot increase confidence, importance, success rate, or validation status.
 10. `think()` is an explicit, observable maintenance operation. Its configuration, inputs, outputs, errors, and resulting mutations are recorded.
+11. Assets are immutable. Evidence links, evaluations, and policy decisions are append-only.
+12. A projection is reproducible from the same immutable history and the same versioned policy bundle.
+13. Partial evidence produces an explicit partial or contested projection; it never silently becomes a best guess.
 
 ## 4. Acceptance gates
 
@@ -94,6 +152,14 @@ Run 2 must meet all aggregate thresholds:
 
 The benchmark must report paired values, medians, p95 values, deltas, confidence intervals, and per-scenario results. Aggregate improvement cannot hide a catastrophic individual regression.
 
+The benchmark must state and test the null hypothesis:
+
+```text
+H0: The learned projection provides no measurable improvement over baseline.
+```
+
+The system may claim learning only when the benchmark protocol rejects H0 at its pre-registered significance threshold and satisfies the non-regression constraints. A second run that happens to be easier does not reject H0.
+
 ### Gate 3: Integrity and explainability
 
 For every injected fact or skill, the audit record must expose:
@@ -110,6 +176,8 @@ For every injected fact or skill, the audit record must expose:
 - creation, verification, correction, and last-use timestamps;
 - predecessor/successor or contradiction links;
 - the execution outcome that caused the current update.
+
+Objective evaluator results and subjective evaluator results are separate evidence classes. Objective evidence includes tests, artifact validation, exit codes, latency, retries, token use, cost, and task completion assertions. Subjective evidence includes usefulness, readability, elegance, and preference. They cannot be combined unless an immutable, versioned policy explicitly defines the combination.
 
 **Pass criteria:**
 
@@ -145,11 +213,11 @@ The system must reject or quarantine:
 
 Each pass has its own artifact, tests, and exit gate. Work does not advance when a pass fails.
 
-### Pass 0 — Contract fixtures and measurement harness
+### Pass 0 — Asset contract, canonicalization, and falsification harness
 
-Define versioned fixtures for traces, skills, outcomes, corrections, contradictions, and no-knowledge controls. Implement metric collection before learning behavior.
+Define the immutable typed Asset contract, append-only evidence/evaluation records, canonicalization rules, content hashes, immutable policy artifacts, event commutativity classification, and versioned fixtures for traces, skills, outcomes, corrections, contradictions, and no-knowledge controls. Implement metric collection before learning behavior.
 
-**Done when:** fixtures validate/reject deterministically; benchmark output includes all Gate 2 metrics; no production behavior is changed.
+**Done when:** equivalent canonical payloads produce identical identities; non-equivalent payloads do not; replay is deterministic; duplicate, reordered, partial, conflicting, split, merge, crash, and policy-version cases have executable results; benchmark output includes all Gate 2 metrics; no production behavior is changed.
 
 ### Pass 1 — Trace contract and durable ingestion
 

@@ -4,6 +4,38 @@
 
 What exists, what needs to be built, what needs to be deployed, and in what order — before any more code generation makes sense.
 
+## Closure Correction — 2026-08-02
+
+The original gap framing treated YantrikDB, OmniRoute, and MetaClaw as if their core engines still needed to be invented. That is no longer the closure target.
+
+The standalone systems are the starting point. The remaining core problem is their evidence-preserving integration:
+
+```text
+OmniRoute observable execution
+→ OmniRoute immutable reusable asset
+→ versioned Evidence-Preserving Asset Contract
+→ YantrikDB evidence/memory projection
+→ MetaClaw procedural projection and policy
+→ next execution
+→ measured compounding
+```
+
+The authoritative objective is `Gradient = Compounding`, measured only through decreasing HITL coordination tax and increasing compression ratio under equal-or-better task correctness and safety. The work below is historical context unless it agrees with the closure contract and Pass 0 falsification plan.
+
+## Current Closure Critical Path
+
+| Pass | Required result | Hard gate |
+|---|---|---|
+| 0 | Immutable asset contract, canonicalization, policies, deterministic projections, H0 harness | Replay and falsification suite passes |
+| 1 | OmniRoute execution correlation and asset adapter | Every asset traces to immutable source events |
+| 2 | YantrikDB evidence/memory projection and `think()` integration | Importance, certainty, decay, conflicts, corrections, and maintenance replay |
+| 3 | MetaClaw projected procedural-state consumer | Bounded, provenance-linked, scope-safe injection |
+| 4 | Outcome/evolution loop | Append-only evaluation and versioned skill state |
+| 5 | Behavioral benchmark | HITL tax decreases and quality-constrained compression increases; H0 rejected |
+| 6 | Hardening and release | Crash, replay, concurrency, security, and deployment evidence |
+
+No later pass can compensate for a failed earlier gate. The legacy layer tables below do not authorize rebuilding a standalone engine that already exists.
+
 ---
 
 ## Layer 1: Network Substrate
@@ -79,29 +111,29 @@ These are existing tools. The gap is deployment, integration, and configuration 
 
 These four services do not exist as off-the-shelf products. They are the architectural core of SAMWISE and must be built.
 
-### YantrikDB — Singular Memory & Truth
+### YantrikDB — Evidence and Memory Projection
 
 | | |
 |---|---|
-| **Status** | Custom build required |
-| **What it must do** | Store validated facts, entity relationships, decisions, constraints, procedures, failures, tool mappings, environment state, provider performance, routing outcomes, workflows, verification criteria, governance rules. Provide contradiction resolution. Track entropy (staleness, confidence decay). Support procedural skill storage and retrieval. Be the singular source of continuity across node failures. |
-| **Design questions** | Graph DB vs document DB vs hybrid? What's the schema for organizational knowledge? How does contradiction resolution work? How is entropy tracked (TTL, confidence scoring, last-verified timestamps)? How does it handle concurrent writes from multiple agents/departments? What's the backup/replication strategy for continuity across node failure? |
+| **Status** | Standalone engine exists; evidence-contract integration remains |
+| **What it must do** | Receive typed immutable assets and append-only evidence/evaluations. Apply validation, idempotency, calibrated importance, half-life decay, recall scoring, links, conflict handling, correction/supersession, and `think()` maintenance. Produce deterministic knowledge projections without rewriting history. |
+| **Design questions** | How are OmniRoute asset types mapped to YantrikDB records? Which fields are objective versus subjective evidence? Which events commute? How are partial projections represented? How are policy versions pinned for replay? |
 | **Dependencies** | None — this is the foundational layer everything else reads from and writes to. |
 | **Effort** | **High.** This is the hardest service to get right because every other service depends on its schema and query model. |
 
-**Gap:** Full design + implementation. This is the single most important build in the architecture.
+**Gap:** Contract adapter, projection tests, replay guarantees, and operational hardening. The standalone engine is not to be reimplemented here.
 
-### OmniRoute — Stateful Inference Router
+### OmniRoute — Observable Execution and Asset Authority
 
 | | |
 |---|---|
-| **Status** | Custom build required |
-| **What it must do** | Aggregate identity pools (6× Gemini, 6× Zen, 6× Kilo, 6× GitHub, etc.). Track per-identity quota usage and predict exhaustion. Route inference requests across providers based on cost, latency, capability, and quota availability. Compress context (token optimization). Cache responses. Score provider performance. Circuit-break failing providers. Failover across providers transparently. Provide a unified API that abstracts all providers behind a single interface. |
-| **Design questions** | What's the identity pool abstraction? How is quota tracked (per-identity, per-provider, per-model)? What's the compression strategy (summarization, truncation, selective inclusion)? What's the cache key schema? How does circuit-breaking work (error rate thresholds, backoff)? What's the scoring model for provider selection? How does it handle streaming responses? |
+| **Status** | Standalone engine and observable trace inventory exist; asset-contract integration remains |
+| **What it must do** | Remain the authoritative source for execution observables and trace-to-reusable-asset conversion. Emit immutable, typed, provenance-linked assets with extractor/version metadata and evidence references. |
+| **Design questions** | What is the exact asset schema? How are execution IDs correlated across requests, MCP calls, retries, fallbacks, artifacts, and evaluators? Which asset fields are immutable? Which outcomes are objective versus subjective? |
 | **Dependencies** | Identity pool credentials. Provider API access. YantrikDB (for routing history and performance data). |
 | **Effort** | **High.** This is the second hardest build. It must be reliable, stateful, and handle the full diversity of provider APIs. |
 
-**Gap:** Full design + implementation. Every inference call in the system flows through this.
+**Gap:** Canonical asset contract, correlation adapter, evaluator binding, and replayable handoff. Do not duplicate OmniRoute's asset engine in MetaClaw.
 
 ### OpenClaw — Governance Brain
 
@@ -115,17 +147,17 @@ These four services do not exist as off-the-shelf products. They are the archite
 
 **Gap:** Full design + implementation. This is the service that makes SAMWISE "supervised" rather than "autonomous chaos."
 
-### MetaClaw — Procedural Skill Evolution
+### MetaClaw — Procedural Projection and Skill Policy
 
 | | |
 |---|---|
-| **Status** | Custom build required |
-| **What it must do** | Observe execution traces. Identify repeated successful patterns. Extract reusable procedures from those patterns. Store procedures in YantrikDB. Inject known procedures into future executions (so agents don't re-discover what's already known). Evolve procedures as environments change. Detect when a procedure is stale or failing. |
-| **Design questions** | What's an "execution trace" and how is it captured? How does pattern detection work (frequency, success rate, similarity)? What's the procedure schema? How are procedures versioned? How does injection work (pre-prompt, tool call, workflow step)? How does evolution work (mutation, testing, rollback)? |
+| **Status** | Standalone capability exists; contract consumer integration remains |
+| **What it must do** | Consume OmniRoute assets and YantrikDB projected procedural state. Apply skill validation, lifecycle, matching, bounded injection, usage evaluation, deviation analysis, and version evolution without mutating the underlying evidence. |
+| **Design questions** | Which asset types can become procedure candidates? What evaluator evidence is required for promotion? How do projected YantrikDB states constrain skill injection? How are skill versions and policy decisions replayed? |
 | **Dependencies** | YantrikDB (for procedure storage). Execution trace data from agents. OmniRoute (for inference during extraction). |
 | **Effort** | **Medium-High.** The extraction and evolution logic is non-trivial, but it builds on top of YantrikDB and trace data. |
 
-**Gap:** Full design + implementation. This is the service that converts execution into compounding.
+**Gap:** A deterministic policy boundary from projected assets to skill behavior. This is where execution becomes measurable compounding.
 
 ---
 
@@ -259,7 +291,7 @@ What must happen, in what order, to get from architecture document to running sy
 
 ### Phase 3: Intelligence
 
-8. **MetaClaw design + implementation** — Execution trace capture, pattern extraction, procedure evolution.
+8. **MetaClaw design + implementation** — Asset-contract consumption, projected procedural state, bounded injection, outcome evaluation, and procedure evolution. Trace interpretation remains OmniRoute-owned.
 9. **OpenClaw design + implementation** — Intent decomposition, governance, delegation, lifecycle management.
 
 ### Phase 4: Browser & UI

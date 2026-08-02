@@ -1,5 +1,21 @@
 # YantrikDB + MetaClaw [skills_only]
 
+## Closure Authority — Evidence-Preserving Asset Loop
+
+This document is subordinate to the [closure contract](docs/superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md). YantrikDB and MetaClaw are standalone engines. This document defines their exact integration boundary.
+
+```text
+OmniRoute raw observables and reusable assets
+→ immutable Evidence-Preserving Asset Contract
+→ YantrikDB validation, calibration, decay, linking, recall, and think
+→ MetaClaw projected procedural state, policy, injection, and evolution
+→ OmniRoute measured next execution
+```
+
+OmniRoute owns trace capture and trace-to-asset conversion. YantrikDB does not replace that engine or treat raw traces as mutable knowledge. YantrikDB receives typed assets plus provenance, stores append-only evidence/evaluations, and produces deterministic projections. MetaClaw consumes projected procedural state rather than bypassing provenance with raw memory.
+
+Assets are immutable. Evaluations, evidence links, relations, and policy decisions are append-only. A correction, split, merge, or supersession creates a new linked object; it never rewrites history.
+
 ## Persistent Continuity — The Compounding Substrate
 
 This document specifies the two services that make compounding mechanically real.
@@ -14,15 +30,15 @@ Every other service in the architecture produces work. These two services conver
 
 ### What YantrikDB Is
 
-YantrikDB is the singular organizational memory. It is not a database in the conventional sense — it is a knowledge substrate that stores, resolves, decays, and serves organizational truth.
+YantrikDB is the singular organizational evidence and memory substrate. It is not the raw execution ledger and it is not an oracle of truth. It stores immutable derived assets, evaluates evidence, resolves projections, applies calibrated importance and half-life decay, and serves policy-scoped knowledge.
 
-Every service reads from YantrikDB. Every service writes to YantrikDB. YantrikDB is the only state that survives node failure, agent death, session end, and departmental boundary.
+Services read projected state from YantrikDB. Writes enter through typed, provenance-preserving adapters. Raw OmniRoute observables remain attributable to their source. YantrikDB is the durable memory state that survives node failure, agent death, session end, and departmental boundary.
 
 **YantrikDB is continuity.**
 
 ### The Knowledge Model
 
-YantrikDB stores twelve knowledge types. Each type has a precise schema. No knowledge enters the system without conforming to one of these types.
+YantrikDB stores twelve projected knowledge types. Each type has a precise schema. No derived knowledge enters the system without an immutable asset identity, source lineage, evaluation class, and policy reference. The asset contract sits before these projections and is the authoritative integration boundary.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -55,7 +71,7 @@ YantrikDB stores twelve knowledge types. Each type has a precise schema. No know
 
 ### Type 1: Fact
 
-A validated piece of declarative knowledge. The atomic unit of organizational truth.
+A validated piece of declarative knowledge represented in a policy-scoped projection. It is not mutable truth; its evidence, provenance, uncertainty, and correction history remain inspectable.
 
 ```typescript
 interface Fact {
@@ -489,7 +505,7 @@ interface EnvironmentState {
 
 ### Type 11: Skill (MetaClaw)
 
-A reusable procedural capability extracted from execution traces. This is MetaClaw's primary output.
+A reusable procedural capability promoted from an immutable `procedure_candidate` asset. OmniRoute owns trace interpretation and asset creation; MetaClaw owns eligibility, promotion, bounded injection, usage evaluation, and evolution.
 
 ```typescript
 interface Skill {
@@ -507,10 +523,10 @@ interface Skill {
   parameters: SkillParameter[];    // inputs the skill accepts
   
   // Provenance
-  source_traces: string[];         // execution trace IDs this was extracted from
-  extraction_method: string;       // how it was identified
-  extracted_at: ISO8601;
-  extracted_by: string;
+  source_assets: string[];         // immutable asset IDs supporting promotion
+  promotion_policy: string;        // versioned policy that allowed promotion
+  promoted_at: ISO8601;
+  promoted_by: string;
   
   // Performance
   usage_count: number;
@@ -572,7 +588,7 @@ interface EvolutionEntry {
 
 ### Type 12: Execution Trace
 
-A complete record of an execution. This is the raw material MetaClaw extracts skills from.
+A complete, immutable record of an execution as observed by OmniRoute. It is source evidence for typed assets and projections; MetaClaw consumes the resulting provenance-linked assets and does not independently reinterpret the trace.
 
 ```typescript
 interface ExecutionTrace {
@@ -831,16 +847,17 @@ Knowledge enters YantrikDB through a structured write interface. No raw inserts 
 interface KnowledgeWrite {
   knowledge_type: KnowledgeType;
   payload: KnowledgePayload;       // one of the 12 type interfaces
-  write_mode: "create" | "update" | "upsert";
+  write_mode: "create" | "deduplicate" | "append_evaluation" | "derive";
   idempotency_key?: string;        // for deduplication
-  source_trace_id?: string;        // execution trace that produced this
-  conflict_resolution?: "reject" | "overwrite" | "merge" | "contradict";
+  source_trace_id?: string;        // OmniRoute execution trace that produced this
+  asset_id?: string;               // immutable asset being projected
+  conflict_resolution?: "reject" | "contradict" | "supersede";
 }
 
 interface WriteResult {
   success: boolean;
   id: string;                      // the created/updated knowledge item ID
-  action: "created" | "updated" | "merged" | "rejected" | "contradicted";
+  action: "created" | "deduplicated" | "derived" | "rejected" | "contradicted";
   contradiction?: {                // if a contradiction was detected
     existing_id: string;
     resolution: "pending" | "superseded" | "deprecated" | "both_active";
@@ -990,13 +1007,13 @@ interface YantrikDB {
 
 ### What MetaClaw Is (In This Mode)
 
-MetaClaw in skills_only mode is a procedural skill extractor and injector. It does three things:
+MetaClaw in `skills_only` mode is the procedural policy and skill consumer. OmniRoute owns the raw execution trace and trace-to-reusable-asset engine. MetaClaw consumes versioned assets and YantrikDB projected procedural state. It does three things:
 
-1. **Observes** execution traces
-2. **Extracts** reusable skills from successful patterns
-3. **Injects** known skills into future executions
+1. **Evaluates** procedure candidates and evidence
+2. **Injects** validated projected skills into future executions
+3. **Evolves** skill policy and versions from evaluated outcomes
 
-It does not do full procedural interception, runtime interception, or execution modification in this mode. It is a read-observe-extract-inject loop on top of YantrikDB.
+It does not do full procedural interception, runtime interception, or execution modification in this mode. It is an asset-consume, policy, inject, and evolve loop on top of YantrikDB. It must not duplicate OmniRoute's asset extraction engine.
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -1045,41 +1062,41 @@ candidate ──► validated ──► active ──► stale ──► depreca
 
 ---
 
-### Phase 1: Observe
+### Phase 1: Consume and Validate Assets
 
-MetaClaw consumes execution traces from YantrikDB.
+MetaClaw consumes immutable assets produced by OmniRoute and projected through YantrikDB. It does not treat an uncorrelated raw trace or agent self-report as sufficient skill evidence.
 
 ```typescript
-interface TraceObserver {
-  // Subscribe to new execution traces
-  onNewTrace(trace: ExecutionTrace): void;
+interface AssetObserver {
+  // Subscribe to immutable assets with source lineage
+  onAsset(asset: EvidencePreservingAsset): void;
   
   // Filter: which traces are worth analyzing
-  shouldAnalyze(trace: ExecutionTrace): boolean;
+  shouldEvaluate(asset: EvidencePreservingAsset): boolean;
 }
 
-// A trace is worth analyzing if:
-function shouldAnalyze(trace: ExecutionTrace): boolean {
+// An asset is eligible for procedural evaluation only when:
+function shouldEvaluate(asset: EvidencePreservingAsset): boolean {
   return (
-    trace.outcome === "success" &&                    // successful execution
-    trace.steps_taken.length >= 3 &&                  // non-trivial (≥3 steps)
-    trace.human_intervention_count <= 2 &&            // mostly autonomous
-    trace.duration_seconds >= 30 &&                   // not instantaneous
-    !isDuplicateTrace(trace)                          // not a repeat of an already-analyzed trace
+    asset.type === "procedure_candidate" &&
+    asset.provenance.source_execution_ids.length > 0 &&
+    asset.evaluation.objective_success === true &&
+    asset.evaluation.safety_pass === true &&
+    !isDuplicateAsset(asset)
   );
 }
 ```
 
 ---
 
-### Phase 2: Extract
+### Phase 2: Consume Projected Procedure Candidates
 
-MetaClaw analyzes successful traces to identify reusable patterns.
+MetaClaw evaluates procedure-candidate assets emitted by OmniRoute and projected by YantrikDB. Any extraction strategy shown below is an OmniRoute asset-engine concern or a separately versioned validator; it is not an implicit second extractor inside MetaClaw.
 
 ```typescript
-interface SkillExtractor {
-  // Analyze a trace and propose candidate skills
-  extract(trace: ExecutionTrace): Promise<CandidateSkill[]>;
+interface ProcedureCandidateValidator {
+  // Evaluate an immutable asset already emitted by OmniRoute and projected by YantrikDB.
+  validate(asset: EvidencePreservingAsset): Promise<ProcedureEvaluation>;
 }
 
 interface CandidateSkill {
@@ -1098,7 +1115,7 @@ interface ExtractionEvidence {
 }
 ```
 
-**Extraction strategies:**
+**Asset-engine reference strategies (owned by OmniRoute, not implemented as a second MetaClaw extractor):**
 
 #### Strategy A: Repeated Sequence Detection
 
@@ -1336,19 +1353,15 @@ Skill v1 → status = "superseded", superseded_by = v2.id
 
 ```typescript
 interface MetaClaw {
-  // Observe
-  ingestTrace(trace: ExecutionTrace): Promise<IngestResult>;
-  
-  // Extract
-  extractSkills(traceIds?: string[]): Promise<CandidateSkill[]>;
-  triggerExtractionAnalysis(scope: "recent" | "all" | "department"): Promise<CandidateSkill[]>;
+  // Consume an immutable, provenance-linked asset from the YantrikDB projection.
+  consumeAsset(asset: EvidencePreservingAsset): Promise<AssetConsumptionResult>;
   
   // Inject
   findApplicableSkills(objective: string, context: ExecutionContext): Promise<MatchedSkill[]>;
   formatForInjection(skills: MatchedSkill[], budget: number): SkillInjectionPayload;
   
   // Evolve
-  recordSkillUsage(skillId: string, trace: ExecutionTrace, outcome: SkillUsageOutcome): Promise<void>;
+  recordSkillUsage(skillId: string, executionId: string, outcome: SkillUsageOutcome): Promise<void>;
   evaluateAllSkills(): Promise<EvolutionRecommendation[]>;
   evolveSkill(skillId: string, changes: SkillChanges, reason: string): Promise<Skill>;
   
@@ -1392,13 +1405,28 @@ interface SkillReport {
 
 This is the complete loop with no hand-waving:
 
+The authoritative integration is an evidence projection loop, not a second trace-extraction loop:
+
+```text
+OmniRoute trace events
+  → OmniRoute immutable typed asset
+  → Evidence-Preserving Asset Contract
+  → YantrikDB projection (validation, calibration, decay, links, conflicts, think)
+  → MetaClaw projected procedural state
+  → bounded injection
+  → OmniRoute observed next execution
+  → append-only evaluation and evidence
+```
+
+The numbered sequence below is retained as an operational narrative. Any step that conflicts with the ownership boundary above is superseded by it.
+
 ```
 1. Human provides intent to OpenClaw
    │
-2. OpenClaw queries YantrikDB for relevant knowledge
+2. OpenClaw queries YantrikDB for relevant projected knowledge
    │  → facts, procedures, constraints, environment state
    │
-3. OpenClaw queries MetaClaw for applicable skills
+3. OpenClaw queries MetaClaw for applicable projected procedural state
    │  → MetaClaw matches trigger patterns against intent
    │  → Returns ranked skills formatted for injection
    │
@@ -1412,20 +1440,19 @@ This is the complete loop with no hand-waving:
    │  → Agents deviate where skills are insufficient
    │  → Agents discover new knowledge during execution
    │
-6. Execution produces a trace
+6. OmniRoute produces immutable execution trace events and reusable typed assets
    │  → Every step, tool call, model call, error, and outcome recorded
    │
-7. Trace is written to YantrikDB
+7. Assets and evidence references are projected into YantrikDB
    │  → New facts extracted from execution
    │  → New failures recorded
    │  → New decisions documented
    │  → Environment state updated
    │
-8. MetaClaw ingests the trace
-   │  → Checks for skill matches (was this trace using a known skill?)
-   │  → Records skill usage outcomes (did the skill work?)
-   │  → Analyzes for new skill extraction (is this a new reusable pattern?)
-   │  → Evaluates existing skills for evolution (do skills need updating?)
+8. MetaClaw consumes projected procedure candidates
+   │  → Checks asset provenance and objective evaluator results
+   │  → Records skill usage outcomes (did the projected skill work?)
+   │  → Applies lifecycle/evolution policy without rewriting evidence
    │
 9. Knowledge compounds
    │  → YantrikDB has more facts, updated state, new failures
@@ -1471,16 +1498,16 @@ Phase C: YantrikDB Advanced
   └── Governance rule evaluation
 
 Phase D: MetaClaw Observe + Inject
-  ├── Trace ingestion pipeline
+  ├── OmniRoute asset adapter and provenance validation
   ├── Skill matching (trigger pattern → objective)
   ├── Skill injection formatting
-  └── Skill store in YantrikDB
+  └── Projected procedural state consumer
 
-Phase E: MetaClaw Extract
-  ├── Repeated sequence detection
-  ├── Cross-trace pattern mining
-  ├── Deduplication against existing skills
-  └── Candidate skill creation
+Phase E: MetaClaw Asset Evaluation
+  ├── Procedure-candidate validation
+  ├── Objective/subjective evaluator separation
+  ├── Evidence deduplication and append-only updates
+  └── Candidate promotion policy
 
 Phase F: MetaClaw Evolve
   ├── Usage outcome recording

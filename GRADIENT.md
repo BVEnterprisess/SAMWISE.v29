@@ -1,5 +1,30 @@
 # SAMWISE — The Compounding Architecture
 
+## Closure Authority — 2026-08-02
+
+This document defines the objective; the [closure contract](docs/superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md) defines the proof obligations.
+
+```text
+Gradient = Compounding
+```
+
+The only optimization target is measurable compounding. Its two derivatives are:
+
+1. HITL coordination tax decreases.
+2. Quality-constrained compression ratio increases.
+
+Latency, tokens, retries, retrieval quality, provenance, and integrity are measurements or constraints. They are not independent objectives.
+
+The benchmark must test:
+
+```text
+H0: the learned projection provides no measurable improvement over baseline
+```
+
+Compression improvement is valid only when task correctness and safety are equal or better. The system must never optimize by answering less, retrieving nothing, hiding uncertainty, or discarding provenance.
+
+Execution produces immutable evidence. Learning is the deterministic projection of immutable evidence under versioned policy.
+
 ## The Single Metric
 
 > **Gradient = Compounding**
@@ -104,9 +129,9 @@ That first execution creates operational knowledge:
                     ┌─────────────────────┐
                     │    YantrikDB         │
                     │                     │
-                    │  Singular Memory    │
-                    │  & Organizational   │
-                    │     Truth           │
+                    │  Evidence Memory   │
+                    │  & Deterministic   │
+                    │    Projections     │
                     └────────┬────────────┘
                              │
           ┌──────────┬───────┴───────┬──────────┐
@@ -247,6 +272,17 @@ Support knowledge therefore reduces future support volume while simultaneously i
 
 This is the organizational flywheel. Each cycle produces knowledge that makes the next cycle cheaper, faster, more reliable, and more autonomous.
 
+For the closure implementation, the ownership boundary is exact:
+
+```text
+OmniRoute observes execution and converts traces into immutable typed assets.
+YantrikDB validates, weights, decays, links, recalls, and thinks over evidence.
+MetaClaw consumes projected procedural state and governs skill policy/injection.
+Evaluators establish objective or subjective outcomes without rewriting history.
+```
+
+The raw trace is not silently converted into mutable truth. Assets are immutable; evidence, evaluations, relations, and policy decisions are append-only.
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                                                              │
@@ -266,7 +302,7 @@ This is the organizational flywheel. Each cycle produces knowledge that makes th
 │   failures, and outcomes                                     │
 │       │                                                      │
 │       ▼                                                      │
-│   MetaClaw extracts reusable procedural knowledge            │
+│   MetaClaw evaluates/promotes projected procedure assets      │
 │       │                                                      │
 │       ▼                                                      │
 │   Midscene + Tandem preserve reusable UI capability          │
@@ -308,7 +344,7 @@ Each service in the architecture has a specific role in the compounding loop. No
 | Service | Compounding Function |
 |---|---|
 | **YantrikDB** | Preserves operational knowledge as singular organizational memory. Facts, relationships, decisions, constraints, procedures, failures, and governance state accumulate here. This is the substrate that makes cross-department knowledge sharing physically possible. |
-| **MetaClaw** | Converts repeated successful execution patterns into reusable procedural capability. When the same class of problem is solved multiple times, MetaClaw extracts the procedure and injects it into future executions. Skills evolve rather than repeat. |
+| **MetaClaw** | Consumes provenance-linked projected procedure assets, promotes only evidence-qualified capabilities, and governs bounded injection, usage evaluation, and evolution. OmniRoute remains the sole trace-to-asset engine. |
 | **n8n** | Converts stable procedures into deterministic workflows. Once a procedure is validated and predictable, it graduates from agent-driven execution to deterministic automation. This removes inference cost entirely for known-good paths. |
 | **Tandem** | Preserves authenticated browser state across identity pools. Browser-based workflows do not need to re-authenticate, re-discover UI elements, or re-navigate to known endpoints. Session state compounds. |
 | **Midscene** | Converts successful UI discovery into reusable interaction procedure. The first time a UI element is found and interacted with, the discovery cost is paid. Subsequent interactions use the learned procedure. Visual grounding cost is paid once. |
@@ -427,7 +463,7 @@ OmniRoute aggregates, scores, caches, and routes across all pools. Provider fail
 │                       │                                         │
 │  ┌────────────────────▼────────────────────────────────────┐    │
 │  │                    YANTRIKDB                             │    │
-│  │  Singular source of truth · Memory · Procedural skills  │    │
+│  │  Immutable evidence · Projections · Memory · Skills     │    │
 │  │  Contradiction resolution · Entropy · Governance state  │    │
 │  │  ── ALWAYS AVAILABLE / CONTINUITY-CRITICAL ──           │    │
 │  └────────────────────┬────────────────────────────────────┘    │
@@ -512,7 +548,7 @@ inject credentials → configure nodes → map webhooks → define HTTP calls �
 These are the laws the system writes, executes, and enforces:
 
 1. **Memory owns agents. Agents own nothing.**
-2. **YantrikDB is the singular source of truth and continuity.**
+2. **YantrikDB owns durable evidence continuity and policy-scoped projections; immutable history remains the source record.**
 3. **Agents are ephemeral execution substrates.**
 4. **OpenClaw owns governance, intent decomposition, and delegation.**
 5. **OmniRoute owns inference routing, provider abstraction, cost, quota, cache, and failover.**
@@ -525,6 +561,11 @@ These are the laws the system writes, executes, and enforces:
 12. **Every successful execution should reduce future coordination or inference cost.**
 13. **Gradient = Compounding.** HITL Coordination Tax % decreases. Compression Ratio % increases.
 14. **Core infrastructure is open-source and self-hostable.** External model providers and identity pools are replaceable execution capacity.
+15. **OmniRoute owns raw observability and trace-to-asset conversion.** No parallel extractor may reinterpret the same source without an explicit versioned contract.
+16. **Assets are immutable.** Evaluations, evidence links, relations, and policy decisions are append-only.
+17. **Learning is projection, not overwrite.** Same immutable history plus same policy bundle must reproduce the same state.
+18. **Partial evidence is explicit.** Incomplete evidence cannot silently promote capability.
+19. **Gradient is the sole objective.** HITL coordination tax and quality-constrained compression are its derivatives; all other values are guardrails or measurements.
 
 ---
 

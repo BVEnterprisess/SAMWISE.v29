@@ -18,19 +18,47 @@ This is the executable plan. Every phase has entry criteria, exit criteria, and 
 ## Where We Are Right Now
 
 ```
-✅ Architecture vision        (GRADIENT.md — merged)
-✅ Gap analysis               (GAPS.md — local)
-✅ YantrikDB + MetaClaw spec  (YANTRIKDB.md — local)
-❌ Repository bootstrap
-❌ Design decisions (language, storage, API)
-❌ Code
-❌ Tests
-❌ CI/CD
-❌ Deployment
-❌ Running system
+✅ Standalone YantrikDB engine boundary identified
+✅ Standalone MetaClaw capability boundary identified
+✅ OmniRoute observable trace and asset-engine boundary identified
+✅ Evidence-Preserving Asset Contract drafted
+✅ Closure gates and H0 defined
+✅ Pass 0 falsification plan written
+✅ Existing Rust sidecar builds and smoke-tests locally
+❌ Asset contract falsification harness
+❌ OmniRoute asset adapter and evaluator binding
+❌ YantrikDB projection adapter
+❌ MetaClaw projected procedural-state integration
+❌ Behavioral compounding benchmark
+❌ Release hardening and deployment evidence
 ```
 
 ---
+
+## Authoritative Closure Roadmap — Gradient = Compounding
+
+The phase map below is historical dependency context. This closure roadmap governs implementation order.
+
+```text
+Pass 0  Asset contract, canonicalization, immutable policies, projections, H0 harness
+Pass 1  OmniRoute asset adapter and execution correlation
+Pass 2  YantrikDB evidence/memory projection and think integration
+Pass 3  MetaClaw projected procedural-state consumption and bounded injection
+Pass 4  Outcome feedback, skill lifecycle, and append-only evolution
+Pass 5  Paired cold/warm/control benchmark
+Pass 6  Crash, replay, concurrency, security, and regression hardening
+Pass 7  Release/deployment evidence
+```
+
+Every pass has a binary gate. The only optimization target is `Gradient = Compounding`, observed through decreasing HITL coordination tax and increasing quality-constrained compression ratio. No pass may be declared complete from a health check or retrieval result alone.
+
+The canonical artifact is immutable. Evidence links, evaluations, relations, and policies are append-only. The same history plus the same policy bundle must reproduce the same projection.
+
+---
+
+## Historical Dependency Map — Reference Only
+
+The original Phase 0–9 material below remains useful as a deployment dependency map, but it is not the active implementation sequence. The active sequence is the closure roadmap above.
 
 ## Phase 0: Repository Bootstrap
 
@@ -412,7 +440,9 @@ tests/
 
 ---
 
-## Phase 6: MetaClaw Extract
+## Historical Phase 6: MetaClaw Extract (superseded)
+
+> This historical phase is retained for context only. It is not an active implementation target. The authoritative sequence is the Closure Roadmap above: OmniRoute creates immutable assets, YantrikDB projects evidence, and MetaClaw consumes projected procedure candidates.
 
 **Entry:** Phase 5 complete.
 
@@ -602,9 +632,9 @@ Phase 3    Entropy + Continuity  ← makes it durable
   │
 Phase 4    Contradiction + Gov.  ← makes it trustworthy
   │                                ← YANTRIKDB COMPLETE
-Phase 5    MetaClaw Observe+Inject ← makes it useful
+Phase 5    MetaClaw Observe+Inject ← historical label; now projected-state consume/inject
   │
-Phase 6    MetaClaw Extract      ← makes it learning
+Phase 6    MetaClaw Extract      ← historical label; now OmniRoute asset engine + YDB projection
   │
 Phase 7    MetaClaw Evolve       ← makes it compounding
   │                                ← METACLAW COMPLETE
@@ -620,46 +650,54 @@ Phase 9    Fleet Deployment      ← makes it operational
 | API routes + storage | Phase 2 (routes can be stubbed against mock store) |
 | Entropy + Subscriptions | Phase 3 (independent subsystems) |
 | Contradiction + Governance | Phase 4 (independent subsystems) |
-| Extract + Evolve scaffolding | Phase 6-7 (evolution scaffolding while extraction is built) |
+| Extract + Evolve scaffolding | Phase 6-7 historical scaffolding; superseded by the closure passes |
 
 ---
 
 ## The Compounding Validation Test
 
-The single test that proves the system works:
+The single behavioral test that proves the system compounds:
 
 ```
-Test: "The second execution is cheaper than the first."
+Test: "Equivalent outcome at lower coordination cost."
 
 Setup:
-  - YantrikDB empty. No skills. No knowledge.
+  - OmniRoute emits immutable execution events and reusable assets.
+  - YantrikDB and MetaClaw start from a clean learning state.
+  - Use paired Run 1, learned Run 2, and no-learning control Run 2.
+  - Fix model, provider, tool set, task family, and evaluator policy.
+  - Record the exact policy bundle and asset lineage.
 
-Execution 1:
-  - Submit objective: "Deploy n8n to the GTX Desktop"
-  - System researches, discovers, executes
-  - Produces: execution trace, facts, procedures, failures
-  - Record: total_steps, total_tokens, total_cost, human_interventions, duration
+Run 1:
+  - Submit a controlled objective.
+  - OmniRoute records requests, tools, retries, artifacts, errors, and outcome evidence.
+  - OmniRoute emits immutable typed assets.
+  - YantrikDB projects evidence with importance, certainty, decay, links, and think results.
 
-MetaClaw extraction:
-  - Ingest trace
-  - Extract skill: "deploy-n8n-to-gtx-desktop"
-  - Store in YantrikDB
+Learning update:
+  - MetaClaw consumes only provenance-linked projected procedure candidates.
+  - Candidate promotion requires objective success and safety-pass evidence.
+  - Evaluations and policy decisions append to history.
 
-Execution 2:
-  - Submit same objective: "Deploy n8n to the GTX Desktop"
-  - System queries YantrikDB → finds facts, procedures
-  - MetaClaw matches → injects skill
-  - System follows known procedure
-  - Record: total_steps, total_tokens, total_cost, human_interventions, duration
+Run 2:
+  - Submit the same or paired objective.
+  - Retrieve YantrikDB projected knowledge and MetaClaw projected procedural state.
+  - Inject only bounded, in-scope, non-stale, non-contested assets.
+  - Evaluate outcome independently.
 
-Assert:
-  - execution_2.total_steps     < execution_1.total_steps
-  - execution_2.total_tokens    < execution_1.total_tokens
-  - execution_2.total_cost      < execution_1.total_cost
-  - execution_2.human_interventions ≤ execution_1.human_interventions
-  - execution_2.duration        < execution_1.duration
+Null hypothesis:
+  H0: the learned projection provides no measurable improvement over baseline.
 
-This is the proof that Gradient = Compounding.
+Reject H0 only when:
+  - task correctness is equal or better;
+  - safety remains passing;
+  - HITL coordination tax decreases;
+  - quality-constrained compression improves;
+  - paired statistical tests pass the pre-registered threshold;
+  - provenance and replay checks pass;
+  - the learned run beats the no-learning control.
+
+This is the proof that Gradient = Compounding. Lower tokens or shorter output alone are not proof.
 ```
 
 ---
@@ -675,7 +713,7 @@ This is the proof that Gradient = Compounding.
 | 3 — Entropy + Continuity | 3–4 days | 2–3 | Replication consistency |
 | 4 — Contradiction + Gov. | 2–3 days | 2 | Contradiction edge cases |
 | 5 — MetaClaw Observe+Inject | 2–3 days | 2 | Matching accuracy |
-| 6 — MetaClaw Extract | 3–4 days | 2–3 | Pattern quality / noise |
+| 6 — MetaClaw Extract (historical) | superseded | — | Replaced by OmniRoute asset-engine validation and YantrikDB projection |
 | 7 — MetaClaw Evolve | 2–3 days | 2 | Evolution correctness |
 | 8 — Integration + Deploy | 2–3 days | 2 | End-to-end reliability |
 | 9 — Fleet Deploy | 1 day | 1 | Environment-specific issues |
@@ -684,6 +722,8 @@ This is the proof that Gradient = Compounding.
 ---
 
 ## What This Repo Should Look Like When We're Done
+
+The following tree is a historical target shape. It does not override the current Rust implementation or the closure roadmap above.
 
 ```
 YantrikDB/
