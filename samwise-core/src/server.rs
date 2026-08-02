@@ -2,9 +2,9 @@ use crate::circuit_breaker::CircuitBreaker;
 use crate::engine_wrapper::{EngineWrapper, SkillRecord};
 use crate::errors::SidecarError;
 use axum::{
+    Json, Router,
     extract::State,
     routing::{get, post},
-    Json, Router,
 };
 use compact_str::CompactString;
 use serde::{Deserialize, Serialize};

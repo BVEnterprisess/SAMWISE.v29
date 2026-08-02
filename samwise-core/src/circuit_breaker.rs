@@ -83,7 +83,8 @@ impl CircuitBreaker {
     }
 
     pub fn record_success(&self) {
-        self.packed.store(Self::pack(CircuitState::Closed, 0, 0), Ordering::Release);
+        self.packed
+            .store(Self::pack(CircuitState::Closed, 0, 0), Ordering::Release);
     }
 
     pub fn record_failure(&self) {

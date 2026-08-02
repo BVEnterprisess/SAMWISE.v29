@@ -7,8 +7,9 @@ mod server;
 use circuit_breaker::CircuitBreaker;
 use compact_str::CompactString;
 use engine_wrapper::EngineWrapper;
+use miette::IntoDiagnostic;
 use proxy::create_proxy_router;
-use server::{create_router, AppState};
+use server::{AppState, create_router};
 use std::sync::Arc;
 use tokio_util::sync::CancellationToken;
 
@@ -39,7 +40,9 @@ async fn main() -> miette::Result<()> {
 
     // 1. Memory Sidecar API Server
     let sidecar_app = create_router(Arc::clone(&shared_state));
-    let sidecar_listener = tokio::net::TcpListener::bind("127.0.0.1:30001").await?;
+    let sidecar_listener = tokio::net::TcpListener::bind("127.0.0.1:30001")
+        .await
+        .into_diagnostic()?;
     tracing::info!("Memory Sidecar active on 127.0.0.1:30001");
 
     let sidecar_shutdown = shutdown.clone();
@@ -54,7 +57,9 @@ async fn main() -> miette::Result<()> {
 
     // 2. MetaProxy Router
     let proxy_app = create_proxy_router(Arc::clone(&shared_state), llm_api_base);
-    let proxy_listener = tokio::net::TcpListener::bind("0.0.0.0:30000").await?;
+    let proxy_listener = tokio::net::TcpListener::bind("0.0.0.0:30000")
+        .await
+        .into_diagnostic()?;
     tracing::info!("MetaProxy active on 0.0.0.0:30000");
 
     let proxy_shutdown = shutdown.clone();

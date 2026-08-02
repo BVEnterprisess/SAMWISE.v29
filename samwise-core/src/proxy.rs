@@ -1,12 +1,12 @@
 use crate::errors::SidecarError;
 use crate::server::AppState;
 use axum::{
+    Json, Router,
     body::Body,
     extract::State,
     http::{HeaderMap, HeaderName, StatusCode},
     response::{IntoResponse, Response},
     routing::post,
-    Router,
 };
 use compact_str::CompactString;
 use reqwest::Client;
@@ -19,7 +19,8 @@ pub struct ProxyState {
     pub client: Client,
 }
 
-const SKILL_INJECTION_HEADER: &str = "\n---\nRelevant Skills\nYou have access to the following guidelines. Apply when relevant:\n\n";
+const SKILL_INJECTION_HEADER: &str =
+    "\n---\nRelevant Skills\nYou have access to the following guidelines. Apply when relevant:\n\n";
 const MAX_CONTEXT_BYTES: usize = 4000;
 
 #[derive(Deserialize, Serialize)]
@@ -92,7 +93,7 @@ async fn chat_completions_handler(
     }
 
     if !skills.is_empty() {
-        let mut injection = CompactString::new(SKILL_INJECTION_HEADER.len() + skills.len() * 256);
+        let mut injection = CompactString::from("");
         injection.push_str(SKILL_INJECTION_HEADER);
         for s in &skills {
             injection.push_str("Skill: ");
@@ -105,9 +106,7 @@ async fn chat_completions_handler(
 
         let injected = payload.messages.iter_mut().any(|m| {
             if m.role.as_str() == "system" {
-                m.content = CompactString::new(m.content.len() + injection.len())
-                    + m.content.as_str()
-                    + injection.as_str();
+                m.content.push_str(injection.as_str());
                 true
             } else {
                 false
@@ -119,15 +118,19 @@ async fn chat_completions_handler(
                 0,
                 ChatMessage {
                     role: CompactString::const_new("system"),
-                    content: CompactString::new(injection.len() + 32)
-                        + "You are a helpful assistant."
-                        + injection.as_str(),
+                    content: CompactString::from(format!(
+                        "You are a helpful assistant.{}",
+                        injection
+                    )),
                 },
             );
         }
     }
 
-    let upstream_url = format!("{}/chat/completions", state.llm_api_base.trim_end_matches('/'));
+    let upstream_url = format!(
+        "{}/chat/completions",
+        state.llm_api_base.trim_end_matches('/')
+    );
     let mut req_builder = state.client.post(&upstream_url).json(&payload);
 
     for (k, v) in headers.iter() {

@@ -1,7 +1,7 @@
 use axum::{
+    Json,
     http::StatusCode,
     response::{IntoResponse, Response},
-    Json,
 };
 use compact_str::CompactString;
 use miette::Diagnostic;
@@ -49,7 +49,9 @@ impl SidecarError {
     pub const fn category(&self) -> ErrorCategory {
         match self {
             Self::Backpressure(_) => ErrorCategory::Backpressure,
-            Self::GovernanceEscalation { .. } | Self::EpochMutation { .. } => ErrorCategory::Governance,
+            Self::GovernanceEscalation { .. } | Self::EpochMutation { .. } => {
+                ErrorCategory::Governance
+            }
             Self::CircuitOpen | Self::Transient(_) => ErrorCategory::Transient,
             Self::Permanent(_) => ErrorCategory::Permanent,
         }
@@ -59,7 +61,10 @@ impl SidecarError {
     pub const fn is_retriable(&self) -> bool {
         matches!(
             self,
-            Self::Backpressure(_) | Self::EpochMutation { .. } | Self::CircuitOpen | Self::Transient(_)
+            Self::Backpressure(_)
+                | Self::EpochMutation { .. }
+                | Self::CircuitOpen
+                | Self::Transient(_)
         )
     }
 }

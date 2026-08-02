@@ -3,8 +3,8 @@ use compact_str::CompactString;
 use serde::Serialize;
 use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
 use std::path::Path;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use tokio::sync::mpsc;
 use yantrikdb::YantrikDB;
 
@@ -23,34 +23,53 @@ pub struct EngineWrapper {
 }
 
 impl EngineWrapper {
-    pub async fn new<P: AsRef<Path>>(db_path: P, state_db_path: P) -> Result<Arc<Self>, SidecarError> {
-        let db_path_str = db_path
-            .as_ref()
-            .to_str()
-            .ok_or_else(|| SidecarError::Permanent(CompactString::const_new("Invalid UTF-8 in db_path")))?;
-        let state_path_str = state_db_path
-            .as_ref()
-            .to_str()
-            .ok_or_else(|| SidecarError::Permanent(CompactString::const_new("Invalid UTF-8 in state_db_path")))?;
+    pub async fn new<P: AsRef<Path>>(
+        db_path: P,
+        state_db_path: P,
+    ) -> Result<Arc<Self>, SidecarError> {
+        let db_path_str = db_path.as_ref().to_str().ok_or_else(|| {
+            SidecarError::Permanent(CompactString::const_new("Invalid UTF-8 in db_path"))
+        })?;
+        let state_path_str = state_db_path.as_ref().to_str().ok_or_else(|| {
+            SidecarError::Permanent(CompactString::const_new("Invalid UTF-8 in state_db_path"))
+        })?;
 
         if let Some(parent) = Path::new(state_path_str).parent() {
-            tokio::fs::create_dir_all(parent)
-                .await
-                .map_err(|e| SidecarError::Permanent(CompactString::from(format!("Dir creation failed: {e}"))))?;
+            tokio::fs::create_dir_all(parent).await.map_err(|e| {
+                SidecarError::Permanent(CompactString::from(format!("Dir creation failed: {e}")))
+            })?;
         }
 
-        let db = Arc::new(YantrikDB::with_default(db_path_str));
+        let db = Arc::new(
+            YantrikDB::with_default(db_path_str)
+                .map_err(|e| SidecarError::Permanent(CompactString::from(e.to_string())))?,
+        );
 
         let state_pool = SqlitePoolOptions::new()
             .max_connections(16)
-            .connect(&format!("sqlite://{state_path_str}?mode=rwc&_journal_mode=WAL"))
+            .connect(&format!("sqlite://{state_path_str}?mode=rwc"))
             .await
-            .map_err(|e| SidecarError::Permanent(CompactString::from(format!("State DB init failed: {e}"))))?;
+            .map_err(|e| {
+                SidecarError::Permanent(CompactString::from(format!("State DB init failed: {e}")))
+            })?;
+
+        sqlx::query("PRAGMA journal_mode = WAL")
+            .execute(&state_pool)
+            .await
+            .map_err(|e| {
+                SidecarError::Permanent(CompactString::from(format!(
+                    "State DB WAL setup failed: {e}"
+                )))
+            })?;
 
         sqlx::migrate!("./migrations")
             .run(&state_pool)
             .await
-            .map_err(|e| SidecarError::Permanent(CompactString::from(format!("Migration execution failed: {e}"))))?;
+            .map_err(|e| {
+                SidecarError::Permanent(CompactString::from(format!(
+                    "Migration execution failed: {e}"
+                )))
+            })?;
 
         let (think_tx, think_rx) = mpsc::channel::<()>(64);
 
@@ -71,14 +90,18 @@ impl EngineWrapper {
             while rx.recv().await.is_some() {
                 let db_clone = Arc::clone(&db);
                 match tokio::task::spawn_blocking(move || {
-                    db_clone.think();
-                    db_clone.scan_conflicts()
+                    db_clone.think(&yantrikdb::ThinkConfig::default())?;
+                    yantrikdb::conflict::scan_conflicts(&db_clone)
                 })
                 .await
                 {
-                    Ok(conflicts) if !conflicts.is_empty() => {
-                        tracing::warn!(count = conflicts.len(), "Conflicts detected in background think loop");
+                    Ok(Ok(conflicts)) if !conflicts.is_empty() => {
+                        tracing::warn!(
+                            count = conflicts.len(),
+                            "Conflicts detected in background think loop"
+                        );
                     }
+                    Ok(Err(e)) => tracing::error!(error = %e, "YantrikDB cognition loop failed"),
                     Err(e) => {
                         tracing::error!(error = %e, "Think loop worker task panicked");
                         tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
@@ -109,13 +132,28 @@ impl EngineWrapper {
         let pool = self.state_pool.clone();
 
         let memory_id = tokio::task::spawn_blocking(move || {
-            db.record(content.as_str(), importance, memory_type.as_str())
-                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string())
+            let metadata = serde_json::json!({"source": "samwise-sidecar"});
+            db.record_text(
+                content.as_str(),
+                memory_type.as_str(),
+                importance.clamp(0.0, 1.0),
+                0.0,
+                604800.0,
+                &metadata,
+                "default",
+                importance.clamp(0.0, 1.0),
+                "cross_department",
+                "user",
+                None,
+            )
+            .map_err(|e| SidecarError::Permanent(CompactString::from(e.to_string())))
         })
         .await
-        .map_err(|e| SidecarError::Permanent(CompactString::from(format!("Blocking task failed: {e}"))))?;
+        .map_err(|e| {
+            SidecarError::Permanent(CompactString::from(format!("Blocking task failed: {e}")))
+        })??;
 
-        let now = tokio::time::Instant::now().elapsed().as_secs_f64();
+        let now = unix_timestamp();
         sqlx::query(
             "INSERT OR IGNORE INTO evolver_state (memory_id, state, updated_at) VALUES (?, 'unprocessed', ?)",
         )
@@ -132,24 +170,24 @@ impl EngineWrapper {
         let db = Arc::clone(&self.db);
         let ctx = context.to_owned();
 
-        let results = tokio::task::spawn_blocking(move || db.surface_procedural(&ctx))
-            .await
-            .map_err(|e| SidecarError::Permanent(CompactString::from(format!("Skill search failed: {e}"))))?;
+        let results = tokio::task::spawn_blocking(move || {
+            let embedding = db
+                .embed(&ctx)
+                .map_err(|e| SidecarError::Permanent(CompactString::from(e.to_string())))?;
+            db.surface_procedural(&embedding, Some(&ctx), None, 10, Some("default"))
+                .map_err(|e| SidecarError::Permanent(CompactString::from(e.to_string())))
+        })
+        .await
+        .map_err(|e| {
+            SidecarError::Permanent(CompactString::from(format!("Skill search failed: {e}")))
+        })??;
 
         Ok(results
             .into_iter()
             .map(|r| SkillRecord {
-                skill_id: r
-                    .get("rid")
-                    .and_then(|v| v.as_str())
-                    .map(CompactString::from)
-                    .unwrap_or_else(|| CompactString::const_new("unknown")),
-                body: r
-                    .get("text")
-                    .and_then(|v| v.as_str())
-                    .map(CompactString::from)
-                    .unwrap_or_default(),
-                importance: r.get("importance").and_then(|v| v.as_f64()).unwrap_or(0.5),
+                skill_id: CompactString::from(r.rid),
+                body: CompactString::from(r.text),
+                importance: r.importance,
             })
             .collect())
     }
@@ -164,33 +202,48 @@ impl EngineWrapper {
     ) -> Result<(), SidecarError> {
         let db = Arc::clone(&self.db);
         let pool = self.state_pool.clone();
+        let skill_id_for_mapping = skill_id.clone();
 
-        let rid_opt = tokio::task::spawn_blocking(move || {
+        let rid = tokio::task::spawn_blocking(move || {
             let meta = serde_json::json!({
                 "skill_id": skill_id.as_str(),
                 "type": skill_type.as_str(),
                 "applies_to": applies_to.iter().map(|s| s.as_str()).collect::<Vec<_>>()
             });
             let text = format!("[METADATA: {}]\n\n{}", meta, body);
-            db.record_procedural(&text, cluster_id.as_str())
+            let embedding = db
+                .embed(&text)
+                .map_err(|e| SidecarError::Permanent(CompactString::from(e.to_string())))?;
+            db.record_procedural(
+                &text,
+                &embedding,
+                "cross_department",
+                cluster_id.as_str(),
+                0.8,
+                "default",
+            )
+            .map_err(|e| SidecarError::Permanent(CompactString::from(e.to_string())))
         })
         .await
-        .map_err(|e| SidecarError::Permanent(CompactString::from(format!("Skill define failed: {e}"))))?;
+        .map_err(|e| {
+            SidecarError::Permanent(CompactString::from(format!("Skill define failed: {e}")))
+        })??;
 
-        if let Some(rid) = rid_opt {
-            sqlx::query("INSERT OR REPLACE INTO skill_mapping (skill_id, engine_rid) VALUES (?, ?)")
-                .bind(skill_id.as_str())
-                .bind(&rid)
-                .execute(&pool)
-                .await?;
-        }
+        sqlx::query("INSERT OR REPLACE INTO skill_mapping (skill_id, engine_rid) VALUES (?, ?)")
+            .bind(skill_id_for_mapping.as_str())
+            .bind(&rid)
+            .execute(&pool)
+            .await?;
 
         self.increment_governance_epoch();
         Ok(())
     }
 
-    pub async fn claim_unprocessed_traces(&self, batch_size: i64) -> Result<Vec<CompactString>, SidecarError> {
-        let now = tokio::time::Instant::now().elapsed().as_secs_f64();
+    pub async fn claim_unprocessed_traces(
+        &self,
+        batch_size: i64,
+    ) -> Result<Vec<CompactString>, SidecarError> {
+        let now = unix_timestamp();
         let rows: Vec<(String,)> = sqlx::query_as(
             r#"
             UPDATE evolver_state
@@ -210,4 +263,11 @@ impl EngineWrapper {
 
         Ok(rows.into_iter().map(|r| CompactString::from(r.0)).collect())
     }
+}
+
+fn unix_timestamp() -> f64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs_f64())
+        .unwrap_or(0.0)
 }
