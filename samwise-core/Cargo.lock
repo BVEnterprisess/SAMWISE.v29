@@ -2461,6 +2461,7 @@ name = "samwise-core"
 version = "3.0.0"
 dependencies = [
  "axum",
+ "blake3",
  "compact_str",
  "miette",
  "reqwest",
