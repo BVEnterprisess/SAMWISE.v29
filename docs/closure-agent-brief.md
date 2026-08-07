@@ -1,5 +1,17 @@
 # Closure Agent Brief: Controlled Adaptation Through Evidence
 
+> **PARTIALLY SUPERSEDED — 2026-08-07.**
+>
+> **Still authoritative:** the audit classification taxonomy (§6) and the closure gate (§7).
+> Every claim about this system is still classified `VERIFIED` / `IMPLEMENTED` / `DOCUMENTED` /
+> `CONTRADICTED` / `ABSENT` / `UNKNOWN`, and closure still requires rejecting `H0` with all
+> conditions holding simultaneously.
+>
+> **Superseded:** §2's ownership diagram and §6's fresh-repository instructions. SAMWISE is now
+> understood as the *composition* of YantrikDB + MetaClaw + OmniRoute, not a service that owns a
+> request path. See `superpowers/specs/2026-08-06-authority-boundary-correction-design.md` and
+> `superpowers/specs/2026-08-06-governor-control-loop-design.md`.
+
 Status: authoritative handoff specification, 2026-08-02
 
 This document is the operating contract for any fresh-repository audit or implementation agent. It exists to remove goal ambiguity and information asymmetry.

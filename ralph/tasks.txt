@@ -9,7 +9,7 @@
 # first two field separators are significant.
 #
 RA1 | Archive samwise-core to archive/samwise-core-v0 with docs/ARCHIVE.md pointer | test ! -d samwise-core && test -f docs/ARCHIVE.md && git cat-file -e archive/samwise-core-v0:samwise-core/Cargo.toml
-RA2 | YANTRIKDB.md section 7 describes no running sidecar | test -f YANTRIKDB.md && ! grep -qE 'sidecar currently provides|proxy routing and circuit-breaker' YANTRIKDB.md
+RA2 | docs/roles/yantrikdb.md section 7 describes no running sidecar | test -f docs/roles/yantrikdb.md && ! grep -qE 'sidecar currently provides|proxy routing and circuit-breaker' docs/roles/yantrikdb.md
 RA3 | README structure tree and prose match the real repository | test "$(grep -c 'samwise-core' README.md)" -eq 1
 RA4 | Placeholder scan ignores fenced code blocks and still catches real placeholders | ./scripts/check-placeholders.sh
 RA5 | CI has no job targeting the archived crate | python3 -c "import yaml;d=yaml.safe_load(open('.github/workflows/ci.yml'));assert list(d['jobs'])==['documentation'],d['jobs']"

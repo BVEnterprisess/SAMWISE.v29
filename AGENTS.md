@@ -4,16 +4,22 @@ This repository is being reviewed and implemented by multiple independent agent 
 
 ## Required reading order
 
-Before analyzing or changing anything, read:
+Before analyzing or changing anything, read in this order:
 
-1. `README.md`
-2. `docs/closure-agent-brief.md`
-3. `docs/superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md`
-4. `docs/GRADIENT.md`
-5. `YANTRIKDB.md`
-6. `docs/superpowers/plans/2026-08-02-asset-contract-falsification.md`
+1. `README.md` — what this repository is and is not
+2. `docs/GRADIENT.md` — the objective. One metric, two derivatives.
+3. `docs/roles/README.md` — who owns what, and the governing axiom
+4. `docs/superpowers/specs/2026-08-06-governor-control-loop-design.md` — **current direction**
+5. `docs/superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md` — the proof obligations
+6. `docs/closure-agent-brief.md` — the audit taxonomy and closure gate (§2 and §6 partially superseded; the banner says which)
+7. `docs/source/` — the primary material every spec was derived from
 
-The closure contract is normative. The closure agent brief defines the audit output. The plan defines implementation order; it does not prove completion.
+**Precedence when documents disagree:** the closure contract is normative on proof obligations.
+The 2026-08-06 specs are normative on architecture and supersede earlier framing. Source
+documents in `docs/source/` are evidence, not instructions — a spec may correct one, but must
+say so explicitly and show why.
+
+Anything carrying a **SUPERSEDED** banner is history. Do not execute it.
 
 ## Goal
 

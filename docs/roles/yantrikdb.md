@@ -2,7 +2,7 @@
 
 Status: authoritative role document, 2026-08-02
 
-This document defines YantrikDB's role in SAMWISE. The [closure contract](docs/superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md) is normative when this document and an implementation detail disagree. The [closure agent brief](docs/closure-agent-brief.md) is the handoff contract for independent reviewers.
+This document defines YantrikDB's role in SAMWISE. The [closure contract](../superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md) is normative when this document and an implementation detail disagree. The [closure agent brief](../closure-agent-brief.md) is the handoff contract for independent reviewers.
 
 ## 1. Why YantrikDB exists
 

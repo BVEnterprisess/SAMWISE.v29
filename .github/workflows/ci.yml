@@ -21,7 +21,7 @@ jobs:
           test -f docs/closure-agent-brief.md
           test -f docs/superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md
           test -f docs/superpowers/plans/2026-08-02-asset-contract-falsification.md
-          test -f YANTRIKDB.md
+          test -f docs/roles/yantrikdb.md
       - name: Reject unresolved placeholders in authoritative docs
         shell: bash
         run: ./scripts/check-placeholders.sh

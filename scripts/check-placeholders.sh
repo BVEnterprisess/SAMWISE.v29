@@ -6,7 +6,7 @@
 # blocks and inline `backtick` spans are stripped before matching.
 set -euo pipefail
 
-FILES=(README.md AGENTS.md YANTRIKDB.md)
+FILES=(README.md AGENTS.md docs/roles/yantrikdb.md)
 mapfile -t DOCS < <(find docs -name '*.md' -type f)
 FILES+=("${DOCS[@]}")
 

@@ -20,7 +20,7 @@ step no-runtime-crate
 step docs
 for f in README.md AGENTS.md docs/GRADIENT.md docs/closure-agent-brief.md \
          docs/superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md \
-         docs/superpowers/plans/2026-08-02-asset-contract-falsification.md YANTRIKDB.md; do
+         docs/superpowers/plans/2026-08-02-asset-contract-falsification.md docs/roles/yantrikdb.md; do
   [ -f "$f" ] || fail "missing canonical doc: $f"
 done
 

@@ -58,7 +58,7 @@ and demonstrates lower HITL coordination tax plus higher quality-constrained com
 2. [`docs/closure-agent-brief.md`](docs/closure-agent-brief.md) — exact audit handoff and epistemic contract.
 3. [`docs/superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md`](docs/superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md) — normative closure specification.
 4. [`docs/GRADIENT.md`](docs/GRADIENT.md) — the why and compounding philosophy.
-5. [`YANTRIKDB.md`](YANTRIKDB.md) — YantrikDB's current role and implementation boundary.
+5. [`docs/roles/yantrikdb.md`](docs/roles/yantrikdb.md) — YantrikDB's current role and implementation boundary.
 6. [`docs/superpowers/plans/2026-08-02-asset-contract-falsification.md`](docs/superpowers/plans/2026-08-02-asset-contract-falsification.md) — Pass 0 implementation plan.
 
 ## Current repository status
@@ -76,27 +76,18 @@ It is runtime-hardened but not closure-complete. The remaining proof obligations
 
 ```text
 .
-├── AGENTS.md                         # agent operating contract
-├── README.md                         # project entrypoint and target
-├── YANTRIKDB.md                      # YantrikDB role and boundary
-├── LICENSE
+├── AGENTS.md          # Operating contract — read automatically by Codex / OpenCode
+├── README.md
 ├── docs/
-│   ├── GRADIENT.md                   # governing why
-│   ├── README.md                     # documentation authority map
-│   ├── closure-agent-brief.md        # fresh-repo audit contract
-│   └── superpowers/
-│       ├── specs/                    # normative specifications
-│       └── plans/                    # executable implementation plans
-├── docs/                             # Normative documents, specs, plans
-├── ralph/                            # Autonomous implementation harness
-│   ├── src/
-│   ├── migrations/
-│   ├── Cargo.toml
-│   ├── Cargo.lock
-│   ├── Dockerfile
-│   └── Makefile
-├── tests/                            # cross-boundary closure test plan
-└── .github/workflows/                # reproducible CI gates
+│   ├── source/        # Primary source material (verbatim, unmodified)
+│   ├── roles/         # Who owns what
+│   ├── superpowers/   # Specs and implementation plans
+│   ├── GRADIENT.md    # The objective
+│   ├── closure-agent-brief.md
+│   ├── test-plan.md
+│   └── ARCHIVE.md
+├── ralph/             # Autonomous implementation harness
+└── scripts/
 ```
 
 ## Non-negotiable rule
