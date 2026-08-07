@@ -1,0 +1,13 @@
+# SAMWISE Pass 0 — Evidence-Preserving Asset Contract & Falsification Harness
+# Source of truth: docs/superpowers/plans/2026-08-02-asset-contract-falsification.md
+#
+# Format:  ID | TITLE | PROOF_COMMAND
+# PROOF_COMMAND runs inside samwise-core/. It must pass for the task to close.
+# The full gate (ralph/gate.sh) must ALSO pass. Both, or the work is reverted.
+#
+P0T1 | Public evidence module boundary: [lib] target, src/lib.rs, src/evidence/mod.rs, blake3 dep | cargo test --test evidence_contract evidence_module_is_public
+P0T2 | Immutable contract types: Asset/EvidenceLink/Evaluation/AssetRelation/PolicyBundle with validating constructors, objective+subjective kept distinct, bounds rejected | cargo test --test evidence_contract types_
+P0T3 | Canonicalization + content addressing: key-sorted, array order preserved, Unicode+numeric normalised, NaN/Inf rejected, schema+policy version in hashed envelope, BLAKE3 lowercase hex | cargo test --test evidence_contract canonical
+P0T4 | Deterministic projection + event-order rules: Partial/Contested/Rejected/Complete, duplicate+missing events, correction/supersession/split/merge, commutativity proof | cargo test --test evidence_contract projection
+P0T5 | Compounding benchmark + H0: HITL coordination tax, quality-constrained compression, paired permutation test, Holm correction, fake-compression rejection | cargo test --test evidence_contract benchmark
+P0T6 | Pass 0 gate evidence: full CI-parity suite green, no placeholders, no silent success path | cargo test --all-targets
