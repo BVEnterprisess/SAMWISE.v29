@@ -93,7 +93,46 @@ v1 of this spec claimed the actuators were missing because `omniroute_set_api_ke
 
 What is missing is not the mechanism but a **programmatic, per-session, TTL-bounded write path** to these controls. That is a materially smaller build than "the actuators don't exist."
 
-### 2.1.2 Unresolved: three memory systems
+### 2.1.1b The write path largely exists too
+
+Per the OmniRoute forensic audit, per-request and per-session control mutation is already shipped:
+
+| Need | Shipped mechanism |
+|---|---|
+| Per-request scoring override | `X-OmniRoute-Mode`, `X-OmniRoute-Steer` headers |
+| Runtime strategy mutation | `omniroute_set_routing_strategy` (MCP) |
+| Breaker threshold tuning (friction) | `omniroute_set_resilience_profile` (MCP) |
+| Budget clamp | `omniroute_set_budget_guard` (MCP) |
+| Routing manifest swap | `omniroute_switch_combo` (MCP) |
+| Dry-run before applying | `omniroute_simulate_route` (MCP) |
+| Full trajectory read | `omniroute_get_session_snapshot` (MCP) |
+| Conditional policy as data | Payload rules, tag-based routing, scheduled budgets |
+
+The three named MCP tools are confirmed present in `src/shared/constants/mcpScopes.ts`. **The governor therefore actuates through existing surfaces; it does not require new OmniRoute primitives.** This retires the "missing actuators" blocker from v1.
+
+### 2.1.2 Benchmark confounds — must be controlled or `H0` is meaningless
+
+OmniRoute ships several mechanisms that **independently make a second run cheaper or better**, with no learning involved. If any are active during a paired Run 1 / Run 2, rejecting `H0` proves nothing:
+
+| Mechanism | Confound |
+|---|---|
+| **Semantic cache** — keyed on SHA-256 of the full request | Run 2 returns Run 1's cached response. Measures caching, not compounding. |
+| **Request dedup / idempotency** — identical requests within 5s | Same class of false positive. |
+| **Context Relay** | Injects a compact summary across account rotation — improves Run 2 through a path that is not the learned projection. |
+| **Zero-Latency Mode** — predictive TTFT skipping + hedging | Latency deltas become routing artefacts, not learning artefacts. |
+| **Session affinity / prompt-cache pinning** | Provider-side prompt caching improves the warm run independently. |
+
+**Rule:** the benchmark harness must disable semantic cache, dedup, context relay, and hedging, and must pin routing, for all three arms (Run 1, Run 2, no-learning control). Any that cannot be disabled must be reported as a stated confound alongside the result. This is also why Run 2 must use a *held-out sibling variant* rather than a byte-identical repeat — an identical repeat is indistinguishable from a cache hit by construction.
+
+### 2.1.3 Evidence-substrate integrity — unverified, potentially blocking
+
+The forensic audit states of the audit tables: *"Audit writes never throw — failure is silently swallowed so audit cannot break the request flow."*
+
+If accurate, the evidence substrate can **silently lose records under pressure**. That is incompatible with Gate 3's requirement of *100% provenance for every injected item*: provenance cannot be guaranteed on a log whose writes may drop without signal.
+
+This is recorded as **claimed-by-documentation and not verified in code** — the relevant handler was not located during this pass. It must be confirmed before any provenance claim is made. If confirmed, SAMWISE requires a durable, non-swallowing evidence path for asset-bearing writes, distinct from OmniRoute's best-effort operational audit.
+
+### 2.1.4 Unresolved: three memory systems
 
 OmniRoute ships its own memory layer — FTS5 + optional Qdrant, with **memory extraction facts** and **memory injection tokens** (§17). MetaClaw injects skills. YantrikDB is defined as the singular substrate.
 
