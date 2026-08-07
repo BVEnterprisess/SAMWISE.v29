@@ -3,7 +3,21 @@
 **Status:** Proposed for review  
 **Date:** 2026-08-02  
 **Scope:** YantrikDB + MetaClaw closed loop, `skills_only` mode  
-**Out of scope:** OmniRoute, runtime interception, multi-modal learning, distributed consensus
+**Out of scope:** runtime interception, multi-modal learning, distributed consensus.
+
+**OmniRoute is scoped per gate, not globally.** A global scope cannot be correct for a
+per-gate property:
+
+- **Gates 1, 3, 4** (functional closure, integrity, safety) assert *invariants*. Invariants
+  must be proven deterministically, on fixtures. OmniRoute is out of scope for these.
+- **Gate 2** (learning improvement; reject `H0`) asserts a *statistical* claim about real
+  execution. Fixtures cannot prove it — authoring the fixtures would author the improvement.
+  OmniRoute is in scope for this gate.
+
+Fixtures prove the mechanism; live execution proves the compounding.
+
+`skills_only` forbids SAMWISE from owning the inference request path. Bounded injection is
+therefore an artifact SAMWISE emits and OmniRoute applies, never a proxy SAMWISE operates
 
 ## 1. Product objective
 

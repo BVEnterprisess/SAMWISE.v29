@@ -64,17 +64,14 @@ Work already committed is safe. An in-flight iteration is discarded, not half-ap
 
 ## What the gate enforces
 
-CI parity plus anti-gaming:
+1. `samwise-core` is absent from the main tree (archived on `archive/samwise-core-v0`)
+2. canonical documents present
+3. `scripts/check-placeholders.sh` — no unresolved placeholders outside fenced code blocks
+4. contract guard — no `todo!()`/`unimplemented!()` in evidence code, no silenced tests
 
-1. `cargo fmt --all -- --check`
-2. `cargo check --all-targets`
-3. `cargo test --all-targets`
-4. `cargo clippy --all-targets --all-features -- -D warnings`
-5. canonical docs present, no `TBD`/`FIXME`
-6. contract guard — no `todo!()`/`unimplemented!()` in `src/evidence`, no `#[ignore]`
-   anywhere, and `projection.rs` must still be able to return `Partial` and `Contested`
+Rust checks (`fmt`, `check`, `test`, `clippy -D warnings`) return when the first runtime
+crate lands. Restore them in `gate.sh` and point `CORE` at the new crate.
 
-Rule 6 exists because those are the shortcuts a cornered model reaches for.
 
 ## Adding work beyond Pass 0
 

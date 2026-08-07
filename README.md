@@ -63,7 +63,12 @@ and demonstrates lower HITL coordination tax plus higher quality-constrained com
 
 ## Current repository status
 
-`samwise-core` is the foundational Rust sidecar. It currently provides YantrikDB bridging, sidecar state, memory buffering, a background think/conflict loop, skill search and definition, proxy routing, context injection, health endpoints, and circuit-breaker behavior.
+This repository contains no runtime code. SAMWISE is the composition of three independently
+shipped systems — YantrikDB (evidence and projections), MetaClaw (procedural skills), and
+OmniRoute (execution and enforcement). It is delivered as contracts, wiring, and invariants.
+
+The former `samwise-core` sidecar is archived on `archive/samwise-core-v0`; see
+`docs/ARCHIVE.md`.
 
 It is runtime-hardened but not closure-complete. The remaining proof obligations are the Asset Contract implementation, OmniRoute adapter, deterministic projection fixtures, MetaClaw evidence adapter, independent outcome evaluators, and the paired compounding benchmark.
 
@@ -82,7 +87,8 @@ It is runtime-hardened but not closure-complete. The remaining proof obligations
 │   └── superpowers/
 │       ├── specs/                    # normative specifications
 │       └── plans/                    # executable implementation plans
-├── samwise-core/                     # Rust runtime sidecar
+├── docs/                             # Normative documents, specs, plans
+├── ralph/                            # Autonomous implementation harness
 │   ├── src/
 │   ├── migrations/
 │   ├── Cargo.toml

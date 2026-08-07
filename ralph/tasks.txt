@@ -1,13 +1,16 @@
-# SAMWISE Pass 0 — Evidence-Preserving Asset Contract & Falsification Harness
-# Source of truth: docs/superpowers/plans/2026-08-02-asset-contract-falsification.md
+# SAMWISE task table
 #
 # Format:  ID | TITLE | PROOF_COMMAND
-# PROOF_COMMAND runs inside samwise-core/. It must pass for the task to close.
-# The full gate (ralph/gate.sh) must ALSO pass. Both, or the work is reverted.
+#   PROOF_COMMAND runs from the repository root. It must pass for the task to close.
+#   The full gate (ralph/gate.sh) must ALSO pass. Both, or the work is reverted.
 #
-P0T1 | Public evidence module boundary: [lib] target, src/lib.rs, src/evidence/mod.rs, blake3 dep | cargo test --test evidence_contract evidence_module_is_public
-P0T2 | Immutable contract types: Asset/EvidenceLink/Evaluation/AssetRelation/PolicyBundle with validating constructors, objective+subjective kept distinct, bounds rejected | cargo test --test evidence_contract types_
-P0T3 | Canonicalization + content addressing: key-sorted, array order preserved, Unicode+numeric normalised, NaN/Inf rejected, schema+policy version in hashed envelope, BLAKE3 lowercase hex | cargo test --test evidence_contract canonical
-P0T4 | Deterministic projection + event-order rules: Partial/Contested/Rejected/Complete, duplicate+missing events, correction/supersession/split/merge, commutativity proof | cargo test --test evidence_contract projection
-P0T5 | Compounding benchmark + H0: HITL coordination tax, quality-constrained compression, paired permutation test, Holm correction, fake-compression rejection | cargo test --test evidence_contract benchmark
-P0T6 | Pass 0 gate evidence: full CI-parity suite green, no placeholders, no silent success path | cargo test --all-targets
+# NOTE: a proof that can pass by doing nothing is not a proof. Every proof below
+# asserts a specific observable outcome. The proof may contain pipes; only the
+# first two field separators are significant.
+#
+RA1 | Archive samwise-core to archive/samwise-core-v0 with docs/ARCHIVE.md pointer | test ! -d samwise-core && test -f docs/ARCHIVE.md && git cat-file -e archive/samwise-core-v0:samwise-core/Cargo.toml
+RA2 | YANTRIKDB.md section 7 describes no running sidecar | test -f YANTRIKDB.md && ! grep -qE 'sidecar currently provides|proxy routing and circuit-breaker' YANTRIKDB.md
+RA3 | README structure tree and prose match the real repository | test "$(grep -c 'samwise-core' README.md)" -eq 1
+RA4 | Placeholder scan ignores fenced code blocks and still catches real placeholders | ./scripts/check-placeholders.sh
+RA5 | CI has no job targeting the archived crate | python3 -c "import yaml;d=yaml.safe_load(open('.github/workflows/ci.yml'));assert list(d['jobs'])==['documentation'],d['jobs']"
+RA6 | Closure contract scopes OmniRoute per gate, not globally | grep -q 'OmniRoute is scoped per gate' docs/superpowers/specs/2026-08-02-yantrikdb-metaclaw-closure-contract.md

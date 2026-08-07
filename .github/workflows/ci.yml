@@ -24,30 +24,9 @@ jobs:
           test -f YANTRIKDB.md
       - name: Reject unresolved placeholders in authoritative docs
         shell: bash
+        run: ./scripts/check-placeholders.sh
+      - name: Reject reappearance of the archived sidecar
+        shell: bash
         run: |
           set -euo pipefail
-          if grep -RInE '(^|[^A-Za-z])(TBD|FIXME)([^A-Za-z]|$)' README.md AGENTS.md YANTRIKDB.md docs; then
-            echo 'Unresolved documentation placeholder found.' >&2
-            exit 1
-          fi
-
-  rust:
-    name: Rust sidecar checks
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: samwise-core
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.88.0
-          components: rustfmt, clippy
-      - name: Check formatting
-        run: cargo fmt --all -- --check
-      - name: Check compilation
-        run: cargo check --all-targets
-      - name: Run tests
-        run: cargo test --all-targets
-      - name: Run clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+          test ! -d samwise-core || { echo 'samwise-core belongs on archive/samwise-core-v0' >&2; exit 1; }

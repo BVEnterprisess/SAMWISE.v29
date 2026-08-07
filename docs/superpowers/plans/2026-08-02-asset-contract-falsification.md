@@ -1,5 +1,15 @@
 # Evidence-Preserving Asset Contract Falsification Implementation Plan
 
+> **SUPERSEDED — 2026-08-07. Do not execute.**
+>
+> This plan's file map targets `samwise-core/`, which is archived on
+> `archive/samwise-core-v0` (see `docs/ARCHIVE.md`), and its commands are written for
+> Windows PowerShell. It is retained for its contract reasoning — the asset, evidence,
+> evaluation, canonicalization, and projection definitions remain sound and inform the
+> current specs. Its paths, commands, and task order do not.
+>
+> Current direction: `docs/superpowers/specs/2026-08-06-governor-control-loop-design.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the Pass 0 contract and falsification harness that makes immutable assets, append-only evidence/evaluations, canonical identities, versioned policies, deterministic projections, and compounding measurements executable before production learning behavior is added.
