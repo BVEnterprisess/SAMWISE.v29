@@ -236,17 +236,19 @@ Corrections and supersessions are append-only. The original asset remains querya
 
 ## 7. Current repository implementation status
 
-The Rust `samwise-core` sidecar currently provides a local runtime bridge with:
+This repository contains **no runtime code**. It holds the normative documents, the
+implementation plans, and the autonomous implementation harness.
 
-- YantrikDB initialization and SQLite-backed sidecar state;
-- memory buffering and session flushing;
-- a background `think()`/conflict-scan loop;
-- skill search and definition calls;
-- bounded context extraction for the proxy;
-- proxy routing and circuit-breaker behavior;
-- health and governance endpoints.
+The former `samwise-core` Rust sidecar has been archived to branch
+`archive/samwise-core-v0` (see `docs/ARCHIVE.md`). Its inline inference proxy was runtime
+interception, which `skills_only` places out of scope.
 
-This is foundational runtime hardening. It is not yet proof of full closure. The repository still requires the Asset Contract implementation, OmniRoute adapter, deterministic projection fixtures, MetaClaw evidence adapter, independent evaluators, and the paired compounding benchmark.
+SAMWISE is the composition of three independently shipped systems — YantrikDB, MetaClaw,
+and OmniRoute. It is delivered as contracts, wiring, and invariants, not as a service. What
+remains to be built is the connective tissue between them, not a new daemon.
+
+Nothing in this repository constitutes proof of closure. The asset contract, the ingestion
+wires, the skill promotion gate, and the paired compounding benchmark are all outstanding.
 
 ## 8. Completion standard
 
